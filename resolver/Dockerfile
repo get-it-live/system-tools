@@ -37,5 +37,5 @@ RUN sed -ri 's/^session\s+required\s+pam_loginuid.so$/session optional pam_login
 # we can has SSH
 EXPOSE 53/udp 53/tcp
 
-ENTRYPOINT ["/usr/bin/dnsmasq"]
-
+ENTRYPOINT ["/usr/sbin/dnsmasq"]
+CMD ["-d"]

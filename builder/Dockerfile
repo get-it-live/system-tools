@@ -43,7 +43,13 @@ RUN /usr/sbin/update-rc.d -f ondemand remove; \
 # small fix for SSH in 13.10 (that's harmless everywhere else)
 RUN sed -ri 's/^session\s+required\s+pam_loginuid.so$/session optional pam_loginuid.so/' /etc/pam.d/sshd
 # Allow SSH for root user with password auth.
-RUN sed -ri 's/^PermitRootLogin\s+without-password$/PermitRootLogin yes/'
+RUN sed -ri 's/^PermitRootLogin\s+without-password$/PermitRootLogin yes/' /etc/ssh/sshd_config
+# First password if debug needed before it gets re-changed automatically to sthg more 'secret'.
+RUN echo 'root:docker.io' | chpasswd
+
+# Install git, add 'git' user
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yq git
+RUN /usr/sbin/useradd -d /git -m -s /usr/bin/git-shell git; mkdir -p /git/.ssh && chown git. /git/.ssh
 
 EXPOSE 22
 
