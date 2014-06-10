@@ -51,6 +51,10 @@ RUN echo 'root:docker.io' | chpasswd
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yq git
 RUN /usr/sbin/useradd -d /git -m -s /usr/bin/git-shell git; mkdir -p /git/.ssh && chown git. /git/.ssh
 
+# Add pubkey
+RUN mkdir -p /git/.ssh/
+ADD getitlive.pubkey /git/.ssh/authorized_keys
+
 EXPOSE 22
 
 # prepare for takeoff

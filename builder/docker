@@ -1,1 +1,1 @@
-DOCKER_OPTS='-H tcp://0.0.0.0:5555 -api-enable-cors=true --daemon=true --debug=true'
+DOCKER_OPTS='-H tcp://0.0.0.0:5555 --api-enable-cors=true --daemon=true --debug=true'
