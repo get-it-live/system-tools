@@ -60,5 +60,4 @@ EXPOSE 22
 # prepare for takeoff
 CMD ["/sbin/init"]
 
-VOLUME /var/lib/docker
 ENTRYPOINT ["/dind"]
