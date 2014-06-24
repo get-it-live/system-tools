@@ -54,8 +54,9 @@ RUN /usr/sbin/useradd -d /git -m -s /usr/bin/git-shell git; mkdir -p /git/.ssh &
 # Add pubkey
 RUN mkdir -p /git/.ssh/
 ADD getitlive.pubkey /git/.ssh/authorized_keys
-ADD ssh-git.sh /git/
-RUN chmod 755 /git/ssh-git.sh
+ADD ssh-git.sh /git/ssh-git.sh
+ADD build.sh /git/build.sh
+RUN chmod 755 /git/ssh-git.sh /git/build.sh
 
 EXPOSE 22
 
