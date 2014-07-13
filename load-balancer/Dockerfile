@@ -7,5 +7,5 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CFFB779AADC995E4F35
 RUN grep "haproxy-1.5" /etc/apt/sources.list || echo "deb http://ppa.launchpad.net/vbernat/haproxy-1.5/ubuntu trusty main" >> /etc/apt/sources.list
 RUN apt-get -y update && apt-get -y install haproxy
 # Enable remote syslog receiving for Haproxy messages
-RUN sudo sed -i 's/#$ModLoad imudp.so/$ModLoad imudp.so/' /etc/rsyslog.conf; sudo sed -i 's/#$UDPServerRun 514/$UDPServerRun 514/' /etc/rsyslog.conf; sudo service rsyslog restart
+RUN sudo sed -i 's/#$ModLoad imudp/$ModLoad imudp/' /etc/rsyslog.conf; sudo sed -i 's/#$UDPServerRun 514/$UDPServerRun 514/' /etc/rsyslog.conf; sudo service rsyslog restart
 CMD ["/lb.sh", "-d"]
