@@ -4,15 +4,13 @@ MAINTAINER Get!tLive.io
 
 RUN echo deb http://archive.ubuntu.com/ubuntu trusty universe > /etc/apt/sources.list.d/universe.list
 
-RUN apt-get update && apt-get install -yq curl
+RUN apt-get update && apt-get install -yq curl git apparmor ssh
 
 # let's grab the lastest "master" version of the install.sh script >:)
 RUN curl -sLS https://raw.github.com/dotcloud/docker/master/hack/install.sh | sh
 
 RUN curl -sLS https://raw.github.com/dotcloud/docker/master/hack/dind -o /dind && chmod +x /dind
 
-# we're going to want this bad boy installed so we can connect :)
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yq ssh
 
 ADD init-lxc.conf /etc/init/fake-container-events.conf
 ADD docker /etc/default/
@@ -48,7 +46,6 @@ RUN sed -ri 's/^PermitRootLogin\s+without-password$/PermitRootLogin yes/' /etc/s
 RUN echo 'root:docker.io' | chpasswd
 
 # Install git, add 'git' user
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yq git
 RUN /usr/sbin/useradd -d /git -m -s /usr/bin/git-shell git; mkdir -p /git/.ssh && chown git. /git/.ssh
 
 # Add pubkey
@@ -57,6 +54,8 @@ ADD getitlive.pubkey /git/.ssh/authorized_keys
 ADD ssh-git.sh /git/ssh-git.sh
 ADD build.sh /git/build.sh
 RUN chmod 755 /git/ssh-git.sh /git/build.sh
+
+VOLUME ["/var/lib/docker"]
 
 EXPOSE 22
 
