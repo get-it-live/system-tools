@@ -31,5 +31,6 @@ trap 'sighup'  HUP
 while true; do
   echo "Starting LB..."
   ${haproxy}&
-  wait %1
+  wait 1
+  echo "waiting"
 done
