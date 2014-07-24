@@ -3,7 +3,7 @@
 # Manage Haproxy in foreground mode 
 # Handle 'graceful' reload when container receives a HUP signal
 PIDFILE="/var/run/haproxy.pid"
-haproxy="/usr/sbin/haproxy -f /etc/haproxy/haproxy.cfg -p ${PIDFILE}"
+haproxy="/usr/sbin/haproxy -db -f /etc/haproxy/haproxy.cfg -p ${PIDFILE}"
 
 sigquit()
 {
@@ -19,7 +19,7 @@ sigint()
 
 sighup()
 {
-  echo "HUP signal received, gracefully reload HaProxy..."
+  echo "HUP signal received, gracefully reloading Load Balancer..."
   ${haproxy} -sf $(cat $PIDFILE)
 }
 
@@ -28,6 +28,8 @@ trap 'sigint'  INT
 trap 'sighup'  HUP
 
 # Run in foreground mode
-echo "Starting LB..."
-${haproxy}
-wait
+while true; do
+  echo "Starting LB..."
+  ${haproxy}&
+  wait %1
+done
