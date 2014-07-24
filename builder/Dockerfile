@@ -2,9 +2,9 @@ FROM ubuntu:trusty
 
 MAINTAINER Get!tLive.io
 
-RUN echo deb http://archive.ubuntu.com/ubuntu trusty universe > /etc/apt/sources.list.d/universe.list
+#RUN grep universe /etc/apt/sources.list || echo deb http://archive.ubuntu.com/ubuntu trusty universe > /etc/apt/sources.list.d/universe.list
 
-RUN apt-get update && apt-get install -yq curl git apparmor ssh
+RUN apt-get update && apt-get install -yq curl git apparmor ssh lxc
 
 # let's grab the lastest "master" version of the install.sh script >:)
 RUN curl -sLS https://raw.github.com/dotcloud/docker/master/hack/install.sh | sh
@@ -55,7 +55,7 @@ ADD ssh-git.sh /git/ssh-git.sh
 ADD build.sh /git/build.sh
 RUN chmod 755 /git/ssh-git.sh /git/build.sh
 
-VOLUME ["/var/lib/docker"]
+#VOLUME ["/var/lib/docker"]
 
 EXPOSE 22
 

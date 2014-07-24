@@ -23,7 +23,13 @@ docker -H tcp://127.0.0.1:5555 build -q "${dockerfile}" | {
     lastline="$line"
   done
   image="`echo ${lastline} | awk '{print $3}'`"
+
+  # Publish Dockerfile
+  echo ${dockerfile} | curl -k -XPOST -d @- -u ${auth} -H 'Content-Type: application/json' -H "Token: ${APIKEY}" \
+    "http://www.getitlive.io/api/Hooks/Repository/${taskId}/Dockerfile"
+
   echo " ***** Publishing ${image} into your '${repo}' images repository..."
+
   echo ${output} | curl -k -XPOST -d @- -u ${auth} -H 'Content-Type: application/json' -H "Token: ${APIKEY}" \
     "http://www.getitlive.io/api/Hooks/Repository/${taskId}/Done?success=true&image=${image}"
   echo " ***** Image published!"
