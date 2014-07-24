@@ -15,7 +15,7 @@ cd ${deployDir}
 echo " ***** Building new Image..."
 output=""
 lastline=""
-docker -H tcp://127.0.0.1:5555 build -q "${dockerfile}" | {
+docker -H tcp://127.0.0.1:5555 build -q "${dockerfile}" 2>&1 | {
   while IFS= read -r line
   do
     echo "$line"
@@ -30,8 +30,13 @@ docker -H tcp://127.0.0.1:5555 build -q "${dockerfile}" | {
     "http://www.getitlive.io/api/Hooks/Repository/${taskId}/Dockerfile"
 
   echo " ***** Publishing ${image} into your '${repo}' images repository..."
+  success="true"
+  if [ -z "$image" ]; then
+    success="false"
+  fi
 
-  echo ${output} | curl -k -s -XPOST -d @- -u ${auth} -H 'Content-Type: application/json' -H "Token: ${APIKEY}" \
-    "http://www.getitlive.io/api/Hooks/Repository/${taskId}/Done?success=true&image=${image}"
+  echo ${output} | curl -k -XPOST -d @- -u ${auth} -H 'Content-Type: application/json' -H "Token: ${APIKEY}" \
+    "http://www.getitlive.io/api/Hooks/Repository/${taskId}/Done?success=${success}&image=${image}"
   echo " ***** Image published!"
 }
+
