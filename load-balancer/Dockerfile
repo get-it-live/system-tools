@@ -8,4 +8,4 @@ RUN apt-get -y update && apt-get -y install haproxy
 RUN sudo sed -i 's/#$ModLoad imudp/$ModLoad imudp/' /etc/rsyslog.conf; sudo sed -i 's/#$UDPServerRun 514/$UDPServerRun 514/' /etc/rsyslog.conf; sudo service rsyslog restart
 ADD lb.sh /
 RUN chmod 755 /lb.sh
-ENTRYPOINT ["/lb.sh"]
+ENTRYPOINT /lb.sh
