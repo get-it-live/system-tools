@@ -6,6 +6,6 @@ RUN grep "haproxy-1.5" /etc/apt/sources.list || echo "deb http://ppa.launchpad.n
 RUN apt-get -y update && apt-get -y install haproxy
 # Enable remote syslog receiving for Haproxy messages
 RUN sudo sed -i 's/#$ModLoad imudp/$ModLoad imudp/' /etc/rsyslog.conf; sudo sed -i 's/#$UDPServerRun 514/$UDPServerRun 514/' /etc/rsyslog.conf; sudo service rsyslog restart
-ADD lb.pl /bin
-RUN chmod 755 /bin/lb.pl
-CMD ["/bin/lb.pl"]
+ADD lb.pl /sbin/
+RUN chmod 755 /sbin/lb.pl
+CMD ["/sbin/lb.pl"]
