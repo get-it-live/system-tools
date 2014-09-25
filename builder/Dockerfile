@@ -54,7 +54,8 @@ ADD getitlive.pubkey /git/.ssh/authorized_keys
 ADD ssh-git.sh /git/ssh-git.sh
 ADD build.sh /git/build.sh
 RUN chmod 755 /git/ssh-git.sh /git/build.sh
-
+ADD getcommits.sh /git/getcommits.sh
+RUN chmod 755 /git/getcommits.sh
 #VOLUME ["/var/lib/docker"]
 
 EXPOSE 22
