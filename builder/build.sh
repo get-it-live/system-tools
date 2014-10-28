@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e
+
+#set -e
 
 repo=$1
 branch=$2
@@ -8,39 +9,53 @@ dockerfile=$4
 taskId=$5
 auth=$6
 cache=$7
-#force=$8
+force=$8
 
 # Expand content to 'deploy' repo
 deployDir="/git/${repo}/${mode}"
 mkdir -p ${deployDir}
 cd ${deployDir}
 
-# Remote latest commit
-#remote_sha="`GIT_WORK_TREE=${deployDir} git ls-remote ${repo} refs/heads/${branch} | awk '{print $1}'`"
-#local_sha="`GIT_WORK_TREE=${deployDir} git rev-parse ${repo}/${branch}`"
-#echo "remote_sha=$remote_sha, local_sha=$local_sha"
+function finish
+{
+  echo $1 | curl -k -s -XPOST -d @- -u ${auth} -H 'Content-Type: application/json' -H "Token: ${APIKEY}" \
+    "http://www.getitlive.io/api/Hooks/Repository/${taskId}/Done?success=false&image=${image}&commit=${remote_sha}"  
+  echo "ERROR : $1"
+  exit 1
+}
 
-#if test "$remote_sha" = "$local_sha"
-#then
-#  if test "$force" = "False" 
-#  then
-#    echo "No commits since last check and build not forced, exiting."
-#    exit 0
-#  fi
-#fi
+checkout=""
+checkout="$(GIT_WORK_TREE=${deployDir} git checkout -f ${branch} || cd ${deployDir} && git checkout -f ${branch} 2>&1)"
 
-GIT_WORK_TREE=${deployDir} git checkout -f ${branch} || cd ${deployDir} && git checkout -f ${branch}
+if [ $? -ne 0 ]
+then
+  echo "Repository checkout failed, aborting build."
+  finish "$checkout"
+  exit 1
+fi
 
-echo " ***** Building new Image..."
 output=""
 lastline=""
-
 if [ "${cache}" == "False" ]; then
   useCache="--no-cache"
 fi
 test -z "${useCache}" && echo " ***** Building new Image (using cache)..." || echo " ***** Building new Image (not using cache)..."
 
-docker -H tcp://127.0.0.1:5555 build -q ${useCache} "${dockerfile}" 2>&1 | {
+# Send/Publish Dockerfile
+dockerfile_path="./${dockerfile}/Dockerfile"
+test -f ${dockerfile_path} || finish "Could not find Dockerfile in specified path '${dockerfile_path}'"
+
+$(curl -k -s -XPOST --data-binary @${dockerfile_path} -u ${auth} -H 'Content-Type: text/plain' -H "Token: ${APIKEY}" \
+    "http://www.getitlive.io/api/Hooks/Repository/${taskId}/Dockerfile" 2>&1)
+
+#build_dockerfile=$(docker -H tcp://127.0.0.1:5555 build -q ${useCache} "${dockerfile}" 2>&1)
+#if [ $? -ne 0 ]
+#then
+#  finish($build_dockerfile)
+#fi
+
+build_dockerfile=""
+build_dockerfile=$(docker -H tcp://127.0.0.1:5555 build -q ${useCache} "${dockerfile}" 2>&1 | {
   while IFS= read -r line
   do
     echo "  $line"
@@ -54,14 +69,15 @@ docker -H tcp://127.0.0.1:5555 build -q ${useCache} "${dockerfile}" 2>&1 | {
   curl -k -s -XPOST --data-binary @${dockerfile_path} -u ${auth} -H 'Content-Type: text/plain' -H "Token: ${APIKEY}" \
     "http://www.getitlive.io/api/Hooks/Repository/${taskId}/Dockerfile"
 
+  sleep 5
+  docker -H tcp://127.0.0.1:5555 inspect ${image} || $(finish "Could not find built image '${image}'"; exit 1) 
+
   echo " ***** Publishing ${image} into your '${repo}' images repository..."
-  success="true"
-  if [ -z "$image" ]; then
-    success="false"
-  fi
-
   echo ${output} | curl -k -s -XPOST -d @- -u ${auth} -H 'Content-Type: application/json' -H "Token: ${APIKEY}" \
-    "http://www.getitlive.io/api/Hooks/Repository/${taskId}/Done?success=${success}&image=${image}&commit=${remote_sha}"
-  echo " ***** Image published!"
-}
+    "http://www.getitlive.io/api/Hooks/Repository/${taskId}/Done?success=true&image=${image}&commit=${remote_sha}"
+} 2>&1)
 
+if [ $? -ne 0 ]
+then
+  finish "$build_dockerfile"
+fi 
