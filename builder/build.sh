@@ -24,15 +24,16 @@ function finish
   exit 1
 }
 
-checkout=""
-checkout="$(GIT_WORK_TREE=${deployDir} git checkout -f ${branch} || cd ${deployDir} && git checkout -f ${branch} 2>&1)"
 
-if [ $? -ne 0 ]
-then
-  echo "Repository checkout failed, aborting build."
-  finish "$checkout"
-  exit 1
-fi
+### Commented out because e already pull in a previous stage, from app/Build.PullRepo()
+#checkout=""
+#checkout="$(GIT_WORK_TREE=${deployDir} git checkout -f ${branch} || cd ${deployDir} && git checkout -f ${branch} 2>&1)"
+#if [ $? -ne 0 ]
+#then
+#  echo "Repository checkout failed, aborting build."
+#  finish "$checkout"
+#  exit 1
+#fi
 
 output=""
 lastline=""
